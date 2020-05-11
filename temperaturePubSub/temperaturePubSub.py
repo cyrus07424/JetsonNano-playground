@@ -138,4 +138,4 @@ while True:
         myAWSIoTMQTTClient.publish(topic, messageJson, 1)
         if args.mode == 'publish':
             print('Published topic %s: %s\n' % (topic, messageJson))
-    time.sleep(1)
+    time.sleep(10)
