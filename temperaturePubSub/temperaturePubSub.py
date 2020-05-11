@@ -104,11 +104,17 @@ myAWSIoTMQTTClient.configureDrainingFrequency(2)  # Draining: 2 Hz
 myAWSIoTMQTTClient.configureConnectDisconnectTimeout(10)  # 10 sec
 myAWSIoTMQTTClient.configureMQTTOperationTimeout(5)  # 5 sec
 
-# Connect and subscribe to AWS IoT
-myAWSIoTMQTTClient.connect()
-if args.mode == 'both' or args.mode == 'subscribe':
-    myAWSIoTMQTTClient.subscribe(topic, 1, customCallback)
-time.sleep(2)
+# Wait for network connection
+while True:
+    try:
+        # Connect and subscribe to AWS IoT
+        myAWSIoTMQTTClient.connect()
+        if args.mode == 'both' or args.mode == 'subscribe':
+            myAWSIoTMQTTClient.subscribe(topic, 1, customCallback)
+        time.sleep(2)
+        break
+    except Exception as e:
+        print(e)
 
 # Publish to the same topic in a loop forever
 while True:
