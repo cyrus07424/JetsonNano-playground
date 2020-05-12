@@ -21,6 +21,7 @@ import time
 import argparse
 import json
 import thermal_zone
+import ambient
 
 AllowedActions = ['both', 'publish', 'subscribe']
 
@@ -49,6 +50,8 @@ parser.add_argument("-m", "--mode", action="store", dest="mode", default="both",
                     help="Operation modes: %s"%str(AllowedActions))
 parser.add_argument("-M", "--message", action="store", dest="message", default="Hello World!",
                     help="Message to publish")
+parser.add_argument("-acid", "--ambientChannelId", action="store", required=True, dest="ambientChannelId", help="ambient channel ID")
+parser.add_argument("-awk", "--ambientWriteKey", action="store", required=True, dest="ambientWriteKey", help="ambient write key")
 
 args = parser.parse_args()
 host = args.host
@@ -59,6 +62,8 @@ port = args.port
 useWebsocket = args.useWebsocket
 clientId = args.clientId
 topic = args.topic
+ambientChannelId = args.ambientChannelId
+ambientWriteKey = args.ambientWriteKey
 
 if args.mode not in AllowedActions:
     parser.error("Unknown --mode option %s. Must be one of %s" % (args.mode, str(AllowedActions)))
@@ -115,6 +120,9 @@ while True:
         break
     except Exception as e:
         print(e)
+        
+# Initialize ambient
+am = ambient.Ambient(ambientChannelId, ambientWriteKey)
 
 # Publish to the same topic in a loop forever
 while True:
@@ -122,9 +130,7 @@ while True:
         # Get Temperature
         zone_paths = thermal_zone.get_thermal_zone_paths()
         zone_names = thermal_zone.get_thermal_zone_names(zone_paths)
-        print(zone_names)
         zone_temps = thermal_zone.get_thermal_zone_temps(zone_paths)
-        print(zone_temps)
         # Convert to celsius
         zone_temps = [t / 1000.0 for t in zone_temps]
 
@@ -134,8 +140,25 @@ while True:
             message[zone_name] = zone_temps[i]
         messageJson = json.dumps(message)
         
-        # Publish message
+        # Publish message to AWS
         myAWSIoTMQTTClient.publish(topic, messageJson, 1)
         if args.mode == 'publish':
             print('Published topic %s: %s\n' % (topic, messageJson))
+            
+        # Publish message to Ambient
+        ambientData = {}
+        for i, zone_name in enumerate(zone_names):
+            if zone_name == 'AO-therm':
+                ambientData['d1'] = zone_temps[i]
+            elif zone_name == 'CPU-therm':
+                ambientData['d2'] = zone_temps[i]
+            elif zone_name == 'GPU-therm':
+                ambientData['d3'] = zone_temps[i]
+            elif zone_name == 'PLL-therm':
+                ambientData['d4'] = zone_temps[i]
+            elif zone_name == 'PMIC-Die':
+                ambientData['d5'] = zone_temps[i]
+            elif zone_name == 'thermal-fan-est':
+                ambientData['d6'] = zone_temps[i]
+        r = am.send(ambientData)
     time.sleep(10)
