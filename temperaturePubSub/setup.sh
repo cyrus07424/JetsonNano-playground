@@ -8,7 +8,7 @@ pip3 install git+https://github.com/AmbientDataInc/ambient-python-lib.git
 
 # Check to see if key file exists, unzip if not
 if [ ! -f ./jetson_nano.cert.pem ]; then
-  unzip -o connect_device_package.zip
+  unzip -n connect_device_package.zip
 fi
 
 # Check to see if root CA file exists, download if not
