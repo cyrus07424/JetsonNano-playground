@@ -23,6 +23,7 @@ import json
 import thermal_zone
 import ambient
 import subprocess
+import requests
 
 AllowedActions = ['both', 'publish', 'subscribe']
 
@@ -152,20 +153,23 @@ while True:
             print('Published topic %s: %s\n' % (topic, messageJson))
 
         # Publish message to Ambient
-        ambientData = {}
-        for i, zone_name in enumerate(zone_names):
-            if zone_name == 'AO-therm':
-                ambientData['d1'] = zone_temps[i]
-            elif zone_name == 'CPU-therm':
-                ambientData['d2'] = zone_temps[i]
-            elif zone_name == 'GPU-therm':
-                ambientData['d3'] = zone_temps[i]
-            elif zone_name == 'PLL-therm':
-                ambientData['d4'] = zone_temps[i]
-            elif zone_name == 'PMIC-Die':
-                ambientData['d5'] = zone_temps[i]
-            elif zone_name == 'thermal-fan-est':
-                ambientData['d6'] = zone_temps[i]
+        try:
+            ambientData = {}
+            for i, zone_name in enumerate(zone_names):
+                if zone_name == 'AO-therm':
+                    ambientData['d1'] = zone_temps[i]
+                elif zone_name == 'CPU-therm':
+                    ambientData['d2'] = zone_temps[i]
+                elif zone_name == 'GPU-therm':
+                    ambientData['d3'] = zone_temps[i]
+                elif zone_name == 'PLL-therm':
+                    ambientData['d4'] = zone_temps[i]
+                elif zone_name == 'PMIC-Die':
+                    ambientData['d5'] = zone_temps[i]
+                elif zone_name == 'thermal-fan-est':
+                    ambientData['d6'] = zone_temps[i]
             ambientData['d7'] = fanSpeed
-        r = am.send(ambientData)
-    time.sleep(10)
+            r = am.send(ambientData)
+        except requests.exceptions.RequestException as e:
+            print('request failed: ', e)
+    time.sleep(30)
