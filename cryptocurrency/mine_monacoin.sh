@@ -7,4 +7,4 @@ set -e
 cd ccminer
 
 # Start mining
-./ccminer -a lyra2rev2 -o stratum+tcp://stratum1.vippool.net:8888 -u evosystem.evo -p pass
+./ccminer -a lyra2rev2 -o stratum+tcp://stratum1.vippool.net:8888 -u <username> -p <password>

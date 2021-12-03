@@ -12,8 +12,13 @@
 ./mine_monacoin.sh
 ```
 
+### Start neoscrypt mining
+```sh
+./mine_neoscrypt.sh
+```
+
 ## Tips
-ビルド時に`ccminer/Makefile.am`の134~135行目を以下のように変更?
+ビルド時に`ccminer/Makefile.am`の124～125行目を以下のように変更
 ```
 nvcc_ARCH += -gencode=arch=compute_53,code=\"sm_53,compute_53\"
 #nvcc_ARCH += -gencode=arch=compute_52,code=\"sm_52,compute_52\"
